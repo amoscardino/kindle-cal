@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
         "Ical"
-    ]
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/674ad2a7-8a49-410c-a065-0ab68579df24/AppServices/subscriptions/674ad2a7-8a49-410c-a065-0ab68579df24/resourceGroups/kindle-cal-rg/providers/Microsoft.Web/sites/kindle-cal",
+    "appService.deploySubpath": "bin/release/net7.0/publish"
 }

@@ -11,7 +11,9 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.MapGet("/image", async (string key, CalendarService calendarService, ImageService imageService) =>
+app.MapGet("/", () => "Hello!");
+
+app.MapGet("/image", async (CalendarService calendarService, ImageService imageService) =>
 {
     var events = await calendarService.GetEventsAsync();
 
@@ -20,7 +22,7 @@ app.MapGet("/image", async (string key, CalendarService calendarService, ImageSe
 
     imageStream.Position = 0;
 
-    return Results.Bytes(imageStream.ToArray(), "image/png", "image.png");
+    return Results.Bytes(imageStream.ToArray(), "image/png");
 });
 
 app.Run();

@@ -19,7 +19,7 @@ public class CalendarService
     public async Task<List<CalEvent>> GetEventsAsync()
     {
         var calEvents = new List<CalEvent>();
-        var urls = _config.GetSection("CalendarUrls").Get<string[]>() ?? new string[] { };
+        var urls = _config.GetValue<string>("CalendarUrls")?.Split(",") ?? new string[] { };
 
         foreach (var url in urls)
         {
