@@ -9,7 +9,7 @@ namespace KindleCal.Services;
 
 public class ImageService
 {
-    private const int Unit = 2;
+    private const int Unit = 1;
     private const int Margin = 10 * Unit;
     private const int MarginHalf = (int)(Margin / 2d);
     private const int MarginDouble = Margin * 2;
