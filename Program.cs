@@ -16,13 +16,9 @@ app.MapGet("/", () => "Hello!");
 app.MapGet("/image", async (CalendarService calendarService, ImageService imageService) =>
 {
     var events = await calendarService.GetEventsAsync();
+    var imageBytes = await imageService.CreateImageAsync(events);
 
-    using var imageStream = new MemoryStream();
-    await imageService.CreateImageAsync(events, imageStream);
-
-    imageStream.Position = 0;
-
-    return Results.Bytes(imageStream.ToArray(), "image/png");
+    return Results.Bytes(imageBytes, "image/png");
 });
 
 app.Run();

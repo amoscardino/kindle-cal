@@ -1,7 +1,7 @@
 using Ical.Net;
+using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 using KindleCal.Models;
-using Microsoft.Extensions.Configuration;
 
 namespace KindleCal.Services;
 
@@ -53,35 +53,91 @@ public class CalendarService
     private List<CalEvent> GetCalEvents(Calendar calendar)
     {
         var calEvents = new List<CalEvent>();
-        var now = DateOnly.FromDateTime(DateTime.Now);
+        var now = DateOnly.FromDateTime(DateTime.Now).AddDays(1);
 
         foreach (var evt in calendar.Events)
         {
-            var startDate = DateOnly.FromDateTime(evt.Start.Date);
+            var regularEvent = GetRegularCalEvent(evt, now);
 
-            if (startDate != now)
+            if (regularEvent != null)
+            {
+                calEvents.Add(regularEvent);
                 continue;
-
-            if (evt.IsAllDay)
-            {
-                calEvents.Add(new CalEvent
-                {
-                    Title = evt.Summary,
-                    Description = evt.Location,
-                });
             }
-            else if (evt.Start is CalDateTime startDateTime && evt.End is CalDateTime endDateTime)
+
+            var occurrenceEvent = GetOccurrenceEvent(evt, now);
+
+            if (occurrenceEvent != null)
             {
-                calEvents.Add(new CalEvent
-                {
-                    Title = evt.Summary,
-                    Description = evt.Location,
-                    StartDate = startDateTime.Value,
-                    EndDate = endDateTime.Value
-                });
+                calEvents.Add(occurrenceEvent);
+                continue;
             }
         }
 
         return calEvents;
+    }
+
+    private CalEvent? GetRegularCalEvent(CalendarEvent evt, DateOnly now)
+    {
+        var startDate = DateOnly.FromDateTime(evt.Start.Date);
+
+        if (startDate != now)
+            return null;
+
+        if (evt.IsAllDay)
+        {
+            return new CalEvent
+            {
+                Title = evt.Summary,
+                Description = evt.Location,
+            };
+        }
+        else if (evt.Start is CalDateTime startDateTime && evt.End is CalDateTime endDateTime)
+        {
+            return new CalEvent
+            {
+                Title = evt.Summary,
+                Description = evt.Location,
+                StartDate = startDateTime.Value,
+                EndDate = endDateTime.Value
+            };
+        }
+
+        return null;
+    }
+
+    private CalEvent? GetOccurrenceEvent(CalendarEvent evt, DateOnly now)
+    {
+        if (!evt.RecurrenceRules.Any())
+            return null;
+
+        var occurrences = evt.GetOccurrences(now.ToDateTime(TimeOnly.MinValue), now.ToDateTime(TimeOnly.MaxValue));
+
+        if (!occurrences.Any())
+            return null;
+
+        var occurrence = occurrences.First();
+
+        if (evt.IsAllDay)
+        {
+            return new CalEvent
+            {
+                Title = evt.Summary,
+                Description = evt.Location,
+            };
+        }
+        else if (occurrence.Period.StartTime is CalDateTime startDateTime
+                && occurrence.Period.EndTime is CalDateTime endDateTime)
+        {
+            return new CalEvent
+            {
+                Title = evt.Summary,
+                Description = evt.Location,
+                StartDate = startDateTime.Value,
+                EndDate = endDateTime.Value
+            };
+        }
+
+        return null;
     }
 }

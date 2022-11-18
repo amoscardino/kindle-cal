@@ -44,14 +44,18 @@ public class ImageService
         };
     }
 
-    public async Task CreateImageAsync(List<CalEvent> events, Stream stream)
+    public async Task<byte[]> CreateImageAsync(List<CalEvent> events)
     {
         using var image = new Image<L8>(Width, Height, Color.White.ToPixel<L8>());
 
         image.Mutate(imageContext => DrawDateHeader(imageContext));
         image.Mutate(imageContext => DrawEvents(imageContext, events));
 
-        await image.SaveAsPngAsync(stream);
+        using var memoryStream = new MemoryStream();
+        await image.SaveAsPngAsync(memoryStream);
+        memoryStream.Position = 0;
+
+        return memoryStream.ToArray();
     }
 
     private void DrawDateHeader(IImageProcessingContext imageContext)
@@ -198,7 +202,7 @@ public class ImageService
 
             descriptionOptions.Origin = new Point
             {
-                X = origin.X + EventTimeWidth + MarginDouble,
+                X = origin.X + EventTimeWidth + MarginDouble + MarginDouble,
                 Y = origin.Y + (int)((double)EventHeight / 2) + MarginHalf
             };
             imageContext.DrawText(descriptionOptions, calEvent.DescriptionShort, _brush);
