@@ -53,7 +53,7 @@ public class CalendarService
     private List<CalEvent> GetCalEvents(Calendar calendar)
     {
         var calEvents = new List<CalEvent>();
-        var now = DateOnly.FromDateTime(DateTime.Now).AddDays(1);
+        var now = DateOnly.FromDateTime(DateTime.Now);
 
         foreach (var evt in calendar.Events)
         {
