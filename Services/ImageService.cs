@@ -50,6 +50,7 @@ public class ImageService
 
         image.Mutate(imageContext => DrawDateHeader(imageContext));
         image.Mutate(imageContext => DrawEvents(imageContext, events));
+        image.Mutate(imageContext => DrawTimeStamp(imageContext));
 
         using var memoryStream = new MemoryStream();
         await image.SaveAsPngAsync(memoryStream);
@@ -222,5 +223,23 @@ public class ImageService
             Y = origin.Y + EventHeight - (1 * Unit)
         };
         imageContext.DrawLines(_lineDrawingOptions, _brush, 2 * Unit, lineStart, lineEnd);
+    }
+
+    private void DrawTimeStamp(IImageProcessingContext imageContext)
+    {
+        var now = DateTime.Now;
+
+        var time = $"Updated: {now.ToString("h:mm tt").ToLower()}";
+        var timeFont = _fontCollection.Get("Ubuntu").CreateFont(16 * Unit);
+        var timeOptions = new TextOptions(timeFont);
+        var timeRect = TextMeasurer.Measure(time, timeOptions);
+
+            timeOptions.Origin = new Point
+            {
+                X = Width - (int)timeRect.Width - Unit,
+                Y = Height - (int)timeRect.Height - Unit
+            };
+
+        imageContext.DrawText(timeOptions, time, _brush);
     }
 }
