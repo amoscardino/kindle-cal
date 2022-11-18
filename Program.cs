@@ -8,13 +8,17 @@ builder.Services.AddTransient<ImageService>();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.MapGet("/", () => "Hello!");
 
-app.MapGet("/image", async (CalendarService calendarService, ImageService imageService) =>
+app.MapGet("/image", async (string key, IConfiguration config, CalendarService calendarService, ImageService imageService) =>
 {
+    var accessKey = config.GetValue<string>("AccessKey");
+
+    if (key != accessKey)
+        return Results.NotFound();
+
     var events = await calendarService.GetEventsAsync();
     var imageBytes = await imageService.CreateImageAsync(events);
 
